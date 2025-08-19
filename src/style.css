@@ -1,0 +1,247 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #1a1a1a;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #1a1a1a;
+}
+
+#app {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* Element Plus 深色主题自定义 */
+.el-button--primary {
+  background: linear-gradient(135deg, #409EFF 0%, #66b3ff 100%);
+  border: none;
+}
+
+.el-button--primary:hover {
+  background: linear-gradient(135deg, #66b3ff 0%, #409EFF 100%);
+}
+
+.el-card {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+}
+
+.el-card__header {
+  background-color: #2d3748;
+  border-bottom: 1px solid #4a5568;
+}
+
+.el-input__wrapper {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.el-input__wrapper:hover {
+  border-color: #409EFF;
+}
+
+.el-input__wrapper.is-focus {
+  border-color: #409EFF;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.el-input__inner {
+  color: #fff;
+}
+
+.el-input__inner::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.el-form-item__label {
+  color: #a0aec0;
+}
+
+.el-dialog {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+}
+
+.el-dialog__header {
+  background-color: #2d3748;
+  border-bottom: 1px solid #4a5568;
+}
+
+.el-dialog__title {
+  color: #fff;
+}
+
+.el-select .el-input__wrapper {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.el-select-dropdown {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+}
+
+.el-select-dropdown__item {
+  color: #fff;
+}
+
+.el-select-dropdown__item:hover {
+  background-color: rgba(64, 158, 255, 0.1);
+}
+
+.el-dropdown-menu {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+}
+
+.el-dropdown-menu__item {
+  color: #fff;
+}
+
+.el-dropdown-menu__item:hover {
+  background-color: rgba(64, 158, 255, 0.1);
+}
+
+.el-tag {
+  background-color: rgba(64, 158, 255, 0.1);
+  border-color: #409EFF;
+  color: #409EFF;
+}
+
+.el-progress-bar__outer {
+  background-color: #4a5568;
+}
+
+.el-progress-bar__inner {
+  background: linear-gradient(90deg, #409EFF, #66b3ff);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .dashboard-main {
+    flex-direction: column;
+  }
+  
+  .dashboard-sidebar {
+    width: 100%;
+    height: auto;
+  }
+  
+  .workspace-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .login-card,
+  .register-card,
+  .reset-card {
+    margin: 20px;
+    padding: 30px;
+  }
+  
+  .profile-container {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: 0 16px;
+  }
+  
+  .dashboard-content {
+    padding: 16px;
+  }
+  
+  .workspace-stats .stats-card {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .workspace-stats .usage-bar {
+    width: 100%;
+  }
+  
+  .workspace-card .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .workspace-card .card-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+
+/* 加载动画 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* 空状态样式 */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #a0aec0;
+}
+
+.empty-state .empty-icon {
+  font-size: 64px;
+  color: #4a5568;
+  margin-bottom: 16px;
+}
+
+.empty-state .empty-text {
+  font-size: 16px;
+  margin-bottom: 24px;
+}

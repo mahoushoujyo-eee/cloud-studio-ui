@@ -1,9 +1,12 @@
 import request from '@/utils/request'
 
+
+const prefix = '/api/user'
+
 // 用户登录
 export const login = (data) => {
   return request({
-    url: '/api/public/login',
+    url: prefix + '/public/login',
     method: 'post',
     data
   })
@@ -12,7 +15,7 @@ export const login = (data) => {
 // 用户注册
 export const register = (data) => {
   return request({
-    url: '/api/public/register',
+    url: prefix + '/public/register',
     method: 'post',
     data
   })
@@ -21,7 +24,7 @@ export const register = (data) => {
 // 发送注册验证码
 export const sendRegisterCode = (data) => {
   return request({
-    url: '/api/public/reset/email',
+    url: prefix + '/public/reset/email',
     method: 'post',
     data: {
       receiver: data.email,
@@ -33,7 +36,7 @@ export const sendRegisterCode = (data) => {
 // 发送重置密码验证码
 export const sendResetCode = (data) => {
   return request({
-    url: '/api/public/reset/email',
+    url: prefix + '/public/reset/email',
     method: 'post',
     data: {
       receiver: data.email,
@@ -45,7 +48,7 @@ export const sendResetCode = (data) => {
 // 重置密码
 export const resetPassword = (data) => {
   return request({
-    url: '/api/public/reset/password',
+    url: prefix + '/public/reset/password',
     method: 'post',
     data
   })
@@ -54,7 +57,7 @@ export const resetPassword = (data) => {
 // 获取用户信息
 export const getUserInfo = () => {
   return request({
-    url: '/api/common/hello',
+    url: prefix + '/common/hello',
     method: 'get'
   })
 }
@@ -62,7 +65,7 @@ export const getUserInfo = () => {
 // 更新用户信息
 export const updateUserInfo = (data) => {
   return request({
-    url: '/api/common/user',
+    url: prefix + '/common/user',
     method: 'put',
     data
   })
@@ -71,7 +74,7 @@ export const updateUserInfo = (data) => {
 // 修改密码
 export const changePassword = (data) => {
   return request({
-    url: '/api/common/change-password',
+    url: prefix + '/common/change-password',
     method: 'post',
     data
   })

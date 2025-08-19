@@ -16,64 +16,44 @@
           v-model="form.name"
           placeholder="请输入工作空间名称"
           maxlength="50"
-          show-word-limit
         />
       </el-form-item>
 
-      <el-form-item label="空间描述">
+      <el-form-item label="模板选择" prop="template" required>
+        <el-select v-model="form.template" placeholder="请选择工作空间模板" style="width: 100%;">
+          <el-option label="Node.js 开发环境" value="nodejs" />
+          <el-option label="Python 开发环境" value="python" />
+          <el-option label="Java 开发环境" value="java" />
+          <el-option label="Go 开发环境" value="go" />
+          <el-option label="空白环境" value="blank" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="CPU 配置" prop="cpu" required>
+        <el-select v-model="form.cpu" placeholder="请选择 CPU 配置" style="width: 100%;">
+          <el-option label="1 核 (1000m)" value="1000m" />
+          <el-option label="2 核 (2000m)" value="2000m" />
+          <el-option label="4 核 (4000m)" value="4000m" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="内存配置" prop="memory" required>
+        <el-select v-model="form.memory" placeholder="请选择内存配置" style="width: 100%;">
+          <el-option label="2GB (2048Mi)" value="2048Mi" />
+          <el-option label="4GB (4096Mi)" value="4096Mi" />
+          <el-option label="8GB (8192Mi)" value="8192Mi" />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="Pod 密码" prop="pod_password" required>
         <el-input
-          v-model="form.description"
-          type="textarea"
-          :rows="3"
-          placeholder="简要描述一下这个工作空间的作用"
-          maxlength="255"
+          v-model="form.pod_password"
+          type="password"
+          placeholder="请输入Pod访问密码"
+          show-password
+          maxlength="50"
           show-word-limit
         />
-      </el-form-item>
-
-      <el-form-item label="代码来源" prop="source" required>
-        <el-radio-group v-model="form.source">
-          <el-radio label="import">导入仓库</el-radio>
-          <el-radio label="template">仓库地址</el-radio>
-          <el-radio label="blank">空间模板</el-radio>
-          <el-radio label="empty">空</el-radio>
-        </el-radio-group>
-      </el-form-item>
-
-      <el-form-item v-if="form.source === 'import'" label="选择仓库服务商">
-        <div class="repo-providers">
-          <div class="provider-item" :class="{ active: form.provider === 'coding' }" @click="form.provider = 'coding'">
-            <div class="provider-logo">CODING</div>
-          </div>
-          <div class="provider-item" :class="{ active: form.provider === 'github' }" @click="form.provider = 'github'">
-            <div class="provider-logo">GitHub</div>
-          </div>
-        </div>
-      </el-form-item>
-
-      <el-form-item label="开发环境" prop="environment" required>
-        <el-select v-model="form.environment" placeholder="请选择开发环境" style="width: 100%;">
-          <el-option label="All in One" value="all-in-one" />
-          <el-option label="Node.js" value="nodejs" />
-          <el-option label="Python" value="python" />
-          <el-option label="Java" value="java" />
-          <el-option label="Go" value="go" />
-        </el-select>
-      </el-form-item>
-
-      <el-form-item label="版本">
-        <el-select v-model="form.version" placeholder="请选择版本" style="width: 100%;">
-          <el-option label="full 1.0.0" value="1.0.0" />
-          <el-option label="lite 1.0.0" value="1.0.0-lite" />
-        </el-select>
-      </el-form-item>
-
-      <el-form-item label="规格配置" prop="spec" required>
-        <el-select v-model="form.spec" placeholder="请选择规格配置" style="width: 100%;">
-          <el-option label="免费版 1核2GB内存 / 8GB 存储" value="free" />
-          <el-option label="基础版 2核4GB内存 / 20GB 存储" value="basic" />
-          <el-option label="专业版 4核8GB内存 / 50GB 存储" value="pro" />
-        </el-select>
       </el-form-item>
     </el-form>
 
@@ -110,12 +90,11 @@ const formRef = ref()
 
 const form = reactive({
   name: '',
-  description: '',
-  source: 'import',
-  provider: 'coding',
-  environment: 'all-in-one',
-  version: '1.0.0',
-  spec: 'free'
+  template: 'nodejs',
+  cpu: '2000m',
+  memory: '4096Mi',
+  user_id: 1,
+  pod_password: ''
 })
 
 const rules = {
@@ -123,14 +102,18 @@ const rules = {
     { required: true, message: '请输入工作空间名称', trigger: 'blur' },
     { min: 1, max: 50, message: '名称长度在1到50个字符', trigger: 'blur' }
   ],
-  source: [
-    { required: true, message: '请选择代码来源', trigger: 'change' }
+  template: [
+    { required: true, message: '请选择工作空间模板', trigger: 'change' }
   ],
-  environment: [
-    { required: true, message: '请选择开发环境', trigger: 'change' }
+  cpu: [
+    { required: true, message: '请选择 CPU 配置', trigger: 'change' }
   ],
-  spec: [
-    { required: true, message: '请选择规格配置', trigger: 'change' }
+  memory: [
+    { required: true, message: '请选择内存配置', trigger: 'change' }
+  ],
+  pod_password: [
+    { required: true, message: '请输入Pod访问密码', trigger: 'blur' },
+    { min: 6, max: 50, message: '密码长度在6到50个字符', trigger: 'blur' }
   ]
 }
 
@@ -151,12 +134,11 @@ const resetForm = () => {
   }
   Object.assign(form, {
     name: '',
-    description: '',
-    source: 'import',
-    provider: 'coding',
-    environment: 'all-in-one',
-    version: '1.0.0',
-    spec: 'free'
+    template: 'nodejs',
+    cpu: '2000m',
+    memory: '4096Mi',
+    user_id: 1,
+    pod_password: ''
   })
 }
 
@@ -174,13 +156,12 @@ const handleSubmit = async () => {
 
   try {
     const result = await workspaceStore.createWorkspace({
+      user_id: form.user_id,
+      cpu: form.cpu,
+      memory: form.memory,
       name: form.name,
-      description: form.description,
-      source: form.source,
-      provider: form.provider,
-      environment: form.environment,
-      version: form.version,
-      spec: form.spec
+      template: form.template,
+      pod_password: form.pod_password
     })
 
     if (result.success) {
@@ -199,38 +180,175 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped lang="scss">
-.repo-providers {
-  display: flex;
-  gap: 16px;
-
-  .provider-item {
-    flex: 1;
-    padding: 16px;
-    border: 2px solid #4a5568;
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-
-    &:hover {
-      border-color: #409EFF;
-    }
-
-    &.active {
-      border-color: #409EFF;
-      background: rgba(64, 158, 255, 0.1);
-    }
-
-    .provider-logo {
-      font-weight: 600;
-      color: #fff;
-    }
-  }
-}
-
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+// 暗色主题样式修复
+:deep(.el-input__wrapper) {
+  background-color: #2d3748 !important;
+  border-color: #4a5568 !important;
+  box-shadow: 0 0 0 1px #4a5568 inset !important;
+  
+  &:hover {
+    border-color: #409EFF !important;
+    box-shadow: 0 0 0 1px #409EFF inset !important;
+  }
+  
+  &.is-focus {
+    border-color: #409EFF !important;
+    box-shadow: 0 0 0 1px #409EFF inset !important;
+  }
+}
+
+:deep(.el-input__inner) {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+  
+  &::placeholder {
+    color: #a0aec0 !important;
+  }
+}
+
+// 修复字数统计显示颜色
+:deep(.el-input__count) {
+  color: #4a5568 !important;
+  background-color: transparent !important;
+}
+
+:deep(.el-textarea__inner) {
+  background-color: #2d3748 !important;
+  border-color: #4a5568 !important;
+  color: #e2e8f0 !important;
+  
+  &::placeholder {
+    color: #a0aec0 !important;
+  }
+  
+  &:hover {
+    border-color: #409EFF !important;
+  }
+  
+  &:focus {
+    border-color: #409EFF !important;
+  }
+}
+
+// 修复选择框样式
+:deep(.el-select) {
+  .el-input {
+    .el-input__wrapper {
+      background-color: #424c5e !important;
+      border-color: #3e424b !important;
+      box-shadow: 0 0 0 1px #4a5568 inset !important;
+      
+      &:hover {
+        border-color: #409EFF !important;
+        box-shadow: 0 0 0 1px #409EFF inset !important;
+      }
+      
+      &.is-focus {
+        border-color: #409EFF !important;
+        box-shadow: 0 0 0 1px #409EFF inset !important;
+      }
+    }
+    
+    .el-input__inner {
+      background-color: transparent !important;
+      color: #e2e8f0 !important;
+      
+      &::placeholder {
+        color: #a0aec0 !important;
+      }
+    }
+  }
+  
+  .el-select__caret {
+    color: #a0aec0 !important;
+  }
+}
+
+:deep(.el-select__wrapper) {
+  background-color: #2d3748 !important;
+}
+
+// 统一选择框字体颜色
+:deep(.el-form-item__label) {
+  color: #b1bcd3 !important;
+}
+
+:deep(.el-select .el-input__inner) {
+  color: #b1bcd3 !important;
+}
+
+:deep(.el-select .el-input__wrapper) {
+  color: #b1bcd3 !important;
+}
+
+:deep(.el-select-dropdown .el-select-dropdown__item) {
+  color: #b1bcd3 !important;
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: #b1bcd3 !important;
+}
+
+// 密码输入框样式
+:deep(.el-input .el-input__wrapper) {
+  background-color: #000000 !important;
+  border: 1px solid #4a5568 !important;
+  color: #b1bcd3 !important;
+}
+
+:deep(.el-input .el-input__inner) {
+  background-color: transparent !important;
+  color: #b1bcd3 !important;
+}
+
+:deep(.el-input .el-input__suffix) {
+  color: #b1bcd3 !important;
+}
+
+// 下拉菜单样式
+:deep(.el-select-dropdown) {
+  background-color: #2d3748 !important;
+  border: 1px solid #4a5568 !important;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+:deep(.el-select-dropdown__item) {
+  color: #e2e8f0 !important;
+  background-color: transparent !important;
+  
+  &:hover {
+    background-color: #4a5568 !important;
+  }
+  
+  &.selected {
+    background-color: #409EFF !important;
+    color: #fff !important;
+  }
+  
+  &.hover {
+    background-color: #4a5568 !important;
+  }
+}
+
+:deep(.el-popper.is-dark) {
+  background-color: #2d3748 !important;
+  border-color: #4a5568 !important;
+}
+
+// 确保所有弹出层都使用暗色主题
+:deep(.el-popper) {
+  background-color: #2d3748 !important;
+  border: 1px solid #4a5568 !important;
+  
+  .el-popper__arrow::before {
+    background-color: #2d3748 !important;
+    border: 1px solid #4a5568 !important;
+  }
 }
 </style>

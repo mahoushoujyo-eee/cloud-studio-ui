@@ -15,7 +15,7 @@ import {
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: '/api',
+  baseURL: '/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
@@ -42,7 +42,7 @@ request.interceptors.request.use(
     
     // 添加token到请求头
     if (authStore.token) {
-      config.headers.Authorization = `Bearer ${authStore.token}`
+      config.headers.Authorization = authStore.token
     }
     
     return config

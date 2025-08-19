@@ -56,13 +56,26 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+
+// 检查本地存储中的token
+onMounted(() => {
+  const token = localStorage.getItem('token')
+  if (token && token !== 'undefined') {
+    // 初始化用户状态
+    authStore.initUser()
+    // 如果已经登录，直接跳转到控制台
+    if (authStore.isAuthenticated) {
+      router.push('/dashboard')
+    }
+  }
+})
 
 const loginFormRef = ref()
 const loading = ref(false)

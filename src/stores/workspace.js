@@ -17,13 +17,16 @@ export const useWorkspaceStore = defineStore('workspace', {
 
   getters: {
     getWorkspaceById: (state) => (id) => {
-      return state.workspaces.find(workspace => workspace.id === id)
+      return state.workspaces.find(workspace => workspace.ID === id)
     },
     runningWorkspaces: (state) => {
-      return state.workspaces.filter(workspace => workspace.status === 'Running')
+      return state.workspaces.filter(workspace => workspace.state === 'running')
     },
     stoppedWorkspaces: (state) => {
-      return state.workspaces.filter(workspace => workspace.status === 'Stopped')
+      return state.workspaces.filter(workspace => workspace.state === 'stopped')
+    },
+    initializingWorkspaces: (state) => {
+      return state.workspaces.filter(workspace => workspace.state === 'initializing')
     }
   },
 
@@ -74,7 +77,7 @@ export const useWorkspaceStore = defineStore('workspace', {
         
         if (response.data.statuscode === 200) {
           // 删除成功后从本地列表中移除
-          this.workspaces = this.workspaces.filter(ws => ws.name !== workspaceData.name)
+          this.workspaces = this.workspaces.filter(ws => ws.pod_name !== workspaceData.pod_name)
           return { success: true, message: '工作空间删除成功' }
         } else {
           return { success: false, message: response.data.message || '删除工作空间失败' }

@@ -1,9 +1,12 @@
 import request from '@/utils/request'
 
+const prefix = '/api/app'
+
+
 // 获取工作空间列表
 export const getWorkspaceList = (data) => {
   return request({
-    url: '/api/common/list',
+    url: prefix + '/common/list',
     method: 'get',
     data
   })
@@ -12,7 +15,7 @@ export const getWorkspaceList = (data) => {
 // 创建工作空间
 export const createWorkspace = (data) => {
   return request({
-    url: '/api/common/create',
+    url: prefix + '/common/create',
     method: 'post',
     data
   })
@@ -21,7 +24,7 @@ export const createWorkspace = (data) => {
 // 删除工作空间
 export const deleteWorkspace = (data) => {
   return request({
-    url: '/api/common/delete',
+    url: prefix + '/common/delete',
     method: 'post',
     data
   })
@@ -30,7 +33,7 @@ export const deleteWorkspace = (data) => {
 // 获取工作空间详情/状态
 export const getWorkspaceDetails = (data) => {
   return request({
-    url: '/api/common/details',
+    url: prefix + '/common/details',
     method: 'post',
     data
   })
@@ -39,7 +42,7 @@ export const getWorkspaceDetails = (data) => {
 // 更新工作空间配置
 export const updateWorkspace = (data) => {
   return request({
-    url: '/api/common/update',
+    url: prefix + '/common/update',
     method: 'post',
     data
   })
@@ -48,7 +51,7 @@ export const updateWorkspace = (data) => {
 // 获取用户信息
 export const getUserHello = () => {
   return request({
-    url: '/api/common/hello',
+    url: prefix + '/common/hello',
     method: 'get'
   })
 }

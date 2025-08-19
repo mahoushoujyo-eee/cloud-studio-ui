@@ -20,16 +20,15 @@ export const useAuthStore = defineStore('auth', {
         const response = await login(credentials)
         
         if (response.data.statuscode === 200) {
-          const { token, user } = response.data.data
+          const token = response.data.data
+          const tokenWithBearer = `Bearer ${token}`
           
-          this.token = token
-          this.user = user
+          this.token = tokenWithBearer
           this.isAuthenticated = true
           
-          localStorage.setItem('token', token)
-          localStorage.setItem('user', JSON.stringify(user))
+          localStorage.setItem('token', tokenWithBearer)
           
-          return { success: true, message: '登录成功' }
+          return { success: true, message: response.data.message || '登录成功' }
         } else {
           return { success: false, message: response.data.message || '登录失败' }
         }
@@ -104,10 +103,17 @@ export const useAuthStore = defineStore('auth', {
       const token = localStorage.getItem('token')
       const user = localStorage.getItem('user')
       
-      if (token && user) {
-        this.token = token
-        this.user = JSON.parse(user)
-        this.isAuthenticated = true
+      if (token && user && user !== 'undefined') {
+        try {
+          this.token = token
+          this.user = JSON.parse(user)
+          this.isAuthenticated = true
+        } catch (error) {
+          console.error('解析用户信息失败:', error)
+          // 清除无效数据
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+        }
       }
     }
   }

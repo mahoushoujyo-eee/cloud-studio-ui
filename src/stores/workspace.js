@@ -4,7 +4,9 @@ import {
   createWorkspace, 
   deleteWorkspace, 
   getWorkspaceDetails,
-  updateWorkspace 
+  updateWorkspace,
+  stopWorkspace,
+  startWorkspace
 } from '@/api/workspace'
 
 export const useWorkspaceStore = defineStore('workspace', {
@@ -12,6 +14,7 @@ export const useWorkspaceStore = defineStore('workspace', {
     workspaces: [],
     currentWorkspace: null,
     loading: false,
+    initialized: false,
     total: 0
   }),
 
@@ -42,13 +45,21 @@ export const useWorkspaceStore = defineStore('workspace', {
           this.total = this.workspaces.length
           return { success: true, data: this.workspaces }
         } else {
+          // 即使请求失败，也要设置空数组
+          this.workspaces = []
+          this.total = 0
           return { success: false, message: response.data.message || '获取工作空间列表失败' }
         }
       } catch (error) {
         console.error('Fetch workspaces error:', error)
+        // 请求异常时也要设置空数组
+        this.workspaces = []
+        this.total = 0
         return { success: false, message: '网络错误，请稍后重试' }
       } finally {
         this.loading = false
+        // 无论成功还是失败，都标记为已初始化
+        this.initialized = true
       }
     },
 
@@ -127,10 +138,47 @@ export const useWorkspaceStore = defineStore('workspace', {
       this.currentWorkspace = workspace
     },
 
+    // 停止工作空间
+    async stopWorkspace(workspaceData) {
+      try {
+        const response = await stopWorkspace(workspaceData)
+        
+        if (response.data.statuscode === 200) {
+          // 停止成功后刷新列表
+          await this.fetchWorkspaces()
+          return { success: true, message: '工作空间已停止' }
+        } else {
+          return { success: false, message: response.data.message || '停止工作空间失败' }
+        }
+      } catch (error) {
+        console.error('Stop workspace error:', error)
+        return { success: false, message: '网络错误，请稍后重试' }
+      }
+    },
+
+    // 启动/重启工作空间
+    async startWorkspace(workspaceData) {
+      try {
+        const response = await startWorkspace(workspaceData)
+        
+        if (response.data.statuscode === 200) {
+          // 启动成功后刷新列表
+          await this.fetchWorkspaces()
+          return { success: true, message: '工作空间启动成功' }
+        } else {
+          return { success: false, message: response.data.message || '启动工作空间失败' }
+        }
+      } catch (error) {
+        console.error('Start workspace error:', error)
+        return { success: false, message: '网络错误，请稍后重试' }
+      }
+    },
+
     // 清空工作空间数据
     clearWorkspaces() {
       this.workspaces = []
       this.currentWorkspace = null
+      this.initialized = false
       this.total = 0
     }
   }

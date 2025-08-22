@@ -10,8 +10,9 @@ import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 
-onMounted(() => {
-  authStore.initUser()
+onMounted(async () => {
+  // 初始化用户认证状态
+  await authStore.initUser()
 })
 </script>
 

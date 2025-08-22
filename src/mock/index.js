@@ -24,6 +24,8 @@ export const mockUsers = [
 export const mockWorkspaces = [
   {
     name: 'my-workspace-1',
+    pod_name: 'my-workspace-1',
+    deployment: 'my-workspace-1-deployment',
     namespace: 'default',
     image: 'node:18-alpine',
     cpu: '1000m',
@@ -32,12 +34,17 @@ export const mockWorkspaces = [
     port: 8080,
     status: 'Running',
     phase: 'Running',
+    state: 'running',
     created_at: '2024-01-15T10:30:00Z',
+    CreatedAt: '2024-01-15T10:30:00Z',
+    UpdatedAt: '2024-01-15T10:30:00Z',
     url: 'https://my-workspace-1.cloudstudio.dev',
     description: 'Node.js开发环境'
   },
   {
     name: 'python-project',
+    pod_name: 'python-project',
+    deployment: 'python-project-deployment',
     namespace: 'default',
     image: 'python:3.9-slim',
     cpu: '500m',
@@ -46,12 +53,17 @@ export const mockWorkspaces = [
     port: 8000,
     status: 'Stopped',
     phase: 'Succeeded',
+    state: 'stopped',
     created_at: '2024-01-10T14:20:00Z',
+    CreatedAt: '2024-01-10T14:20:00Z',
+    UpdatedAt: '2024-01-10T14:20:00Z',
     url: '',
     description: 'Python开发环境'
   },
   {
     name: 'react-app',
+    pod_name: 'react-app',
+    deployment: 'react-app-deployment',
     namespace: 'default',
     image: 'node:16-alpine',
     cpu: '2000m',
@@ -60,7 +72,10 @@ export const mockWorkspaces = [
     port: 3000,
     status: 'Running',
     phase: 'Running',
+    state: 'running',
     created_at: '2024-01-12T09:15:00Z',
+    CreatedAt: '2024-01-12T09:15:00Z',
+    UpdatedAt: '2024-01-12T09:15:00Z',
     url: 'https://react-app.cloudstudio.dev',
     description: 'React前端开发环境'
   }

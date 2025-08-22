@@ -56,8 +56,17 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
+  
+  // 如果有token但未认证，先初始化用户状态
+  if (authStore.token && !authStore.isAuthenticated) {
+    try {
+      await authStore.initUser()
+    } catch (error) {
+      console.error('初始化用户状态失败:', error)
+    }
+  }
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')

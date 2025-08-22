@@ -65,14 +65,18 @@ const router = useRouter()
 const authStore = useAuthStore()
 
 // 检查本地存储中的token
-onMounted(() => {
+onMounted(async () => {
   const token = localStorage.getItem('token')
-  if (token && token !== 'undefined') {
-    // 初始化用户状态
-    authStore.initUser()
-    // 如果已经登录，直接跳转到控制台
-    if (authStore.isAuthenticated) {
-      router.push('/dashboard')
+  if (token && token !== 'undefined' && token !== 'null') {
+    try {
+      // 初始化用户状态
+      await authStore.initUser()
+      // 如果已经登录，直接跳转到控制台
+      if (authStore.isAuthenticated) {
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      console.error('初始化用户状态失败:', error)
     }
   }
 })

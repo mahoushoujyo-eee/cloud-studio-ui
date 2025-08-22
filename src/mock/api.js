@@ -108,6 +108,57 @@ export const mockGetWorkspaceDetails = async (data) => {
   return mockErrorResponse('工作空间不存在', 404)
 }
 
+// 模拟停止工作空间API
+export const mockStopWorkspace = async (data) => {
+  await delay()
+  const workspace = mockWorkspaces.find(ws => ws.deployment === data.deployment)
+  if (workspace) {
+    workspace.status = 'Stopped'
+    workspace.phase = 'Succeeded'
+    workspace.state = 'stopped'
+    workspace.url = ''
+    workspace.UpdatedAt = new Date().toISOString()
+    return mockApiResponse(null, '工作空间已停止')
+  }
+  return mockErrorResponse('工作空间不存在', 404)
+}
+
+// 模拟启动/重启工作空间API
+export const mockStartWorkspace = async (data) => {
+  await delay()
+  const workspace = mockWorkspaces.find(ws => ws.deployment === data.deployment)
+  if (workspace) {
+    workspace.status = 'Running'
+    workspace.phase = 'Running'
+    workspace.state = 'running'
+    workspace.UpdatedAt = new Date().toISOString()
+    // 模拟生成访问 URL
+    workspace.url = `https://${workspace.name}.cloudstudio.dev`
+    return mockApiResponse(null, '工作空间启动成功')
+  }
+  return mockErrorResponse('工作空间不存在', 404)
+}
+
+// 模拟获取工作空间日志API
+export const mockGetWorkspaceLog = async (data) => {
+  await delay()
+  const workspace = mockWorkspaces.find(ws => ws.deployment === data.deployment)
+  if (workspace) {
+    // 模拟日志内容
+    const logContent = `
+=== ${workspace.name} 工作空间日志 ===
+[2024-01-20 10:30:00] INFO: 容器启动中...
+[2024-01-20 10:30:05] INFO: 环境初始化完成
+[2024-01-20 10:30:10] INFO: 服务已启动，端口: ${workspace.port}
+[2024-01-20 10:30:15] INFO: 工作空间就绪，URL: ${workspace.url}
+[2024-01-20 10:35:00] DEBUG: 健康检查通过
+[2024-01-20 10:40:00] DEBUG: 资源使用: CPU ${workspace.cpu}, Memory ${workspace.memory}
+    `.trim()
+    return mockApiResponse(logContent, '日志获取成功')
+  }
+  return mockErrorResponse('工作空间不存在', 404)
+}
+
 export default function setupMockAPI() {
   console.log('Mock API initialized')
 }

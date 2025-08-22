@@ -140,6 +140,23 @@ body {
   background: linear-gradient(90deg, #409EFF, #66b3ff);
 }
 
+/* Element Plus Loading 组件暗色主题 */
+.el-loading-mask {
+  background-color: rgba(26, 26, 26, 0.8) !important;
+}
+
+.el-loading-spinner {
+  color: #409EFF !important;
+}
+
+.el-loading-spinner .circular {
+  color: #409EFF !important;
+}
+
+.el-loading-text {
+  color: #ffffff !important;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .dashboard-main {

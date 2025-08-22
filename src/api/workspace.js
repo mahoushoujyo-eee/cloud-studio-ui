@@ -55,3 +55,30 @@ export const getUserHello = () => {
     method: 'get'
   })
 }
+
+// 停止工作空间
+export const stopWorkspace = (data) => {
+  return request({
+    url: prefix + '/common/stop',
+    method: 'post',
+    data
+  })
+}
+
+// 启动/重启工作空间
+export const startWorkspace = (data) => {
+  return request({
+    url: prefix + '/common/restart',
+    method: 'post',
+    data
+  })
+}
+
+// 获取工作空间日志
+export const getWorkspaceLog = (data) => {
+  return request({
+    url: prefix + '/common/log',
+    method: 'post',
+    data
+  })
+}

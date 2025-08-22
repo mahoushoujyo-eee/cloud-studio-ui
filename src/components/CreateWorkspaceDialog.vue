@@ -186,136 +186,132 @@ const handleSubmit = async () => {
   gap: 12px;
 }
 
-// 暗色主题样式修复
-:deep(.el-input__wrapper) {
+// 暗色主题全局样式修复
+:deep(.el-dialog) {
   background-color: #2d3748 !important;
-  border-color: #4a5568 !important;
-  box-shadow: 0 0 0 1px #4a5568 inset !important;
+  border: 1px solid #4a5568 !important;
   
-  &:hover {
-    border-color: #409EFF !important;
-    box-shadow: 0 0 0 1px #409EFF inset !important;
-  }
-  
-  &.is-focus {
-    border-color: #409EFF !important;
-    box-shadow: 0 0 0 1px #409EFF inset !important;
-  }
-}
-
-:deep(.el-input__inner) {
-  background-color: transparent !important;
-  color: #e2e8f0 !important;
-  
-  &::placeholder {
-    color: #a0aec0 !important;
-  }
-}
-
-// 修复字数统计显示颜色
-:deep(.el-input__count) {
-  color: #4a5568 !important;
-  background-color: transparent !important;
-}
-
-:deep(.el-textarea__inner) {
-  background-color: #2d3748 !important;
-  border-color: #4a5568 !important;
-  color: #e2e8f0 !important;
-  
-  &::placeholder {
-    color: #a0aec0 !important;
-  }
-  
-  &:hover {
-    border-color: #409EFF !important;
-  }
-  
-  &:focus {
-    border-color: #409EFF !important;
-  }
-}
-
-// 修复选择框样式
-:deep(.el-select) {
-  .el-input {
-    .el-input__wrapper {
-      background-color: #424c5e !important;
-      border-color: #3e424b !important;
-      box-shadow: 0 0 0 1px #4a5568 inset !important;
-      
-      &:hover {
-        border-color: #409EFF !important;
-        box-shadow: 0 0 0 1px #409EFF inset !important;
-      }
-      
-      &.is-focus {
-        border-color: #409EFF !important;
-        box-shadow: 0 0 0 1px #409EFF inset !important;
-      }
+  .el-dialog__header {
+    background-color: #2d3748 !important;
+    border-bottom: 1px solid #4a5568 !important;
+    
+    .el-dialog__title {
+      color: #e2e8f0 !important;
     }
     
-    .el-input__inner {
-      background-color: transparent !important;
-      color: #e2e8f0 !important;
+    .el-dialog__close {
+      color: #a0aec0 !important;
       
-      &::placeholder {
-        color: #a0aec0 !important;
+      &:hover {
+        color: #e2e8f0 !important;
       }
     }
+  }
+  
+  .el-dialog__body {
+    background-color: #2d3748 !important;
+    color: #e2e8f0 !important;
+  }
+  
+  .el-dialog__footer {
+    background-color: #2d3748 !important;
+    border-top: 1px solid #4a5568 !important;
+  }
+}
+
+// 表单标签样式
+:deep(.el-form-item__label) {
+  color: #e2e8f0 !important;
+}
+
+// 输入框样式统一
+:deep(.el-input) {
+  .el-input__wrapper {
+    background-color: #1a202c !important;
+    border: 1px solid #4a5568 !important;
+    box-shadow: none !important;
+    
+    &:hover {
+      border-color: #409EFF !important;
+    }
+    
+    &.is-focus {
+      border-color: #409EFF !important;
+      box-shadow: 0 0 0 1px #409EFF !important;
+    }
+  }
+  
+  .el-input__inner {
+    background-color: transparent !important;
+    color: #e2e8f0 !important;
+    
+    &::placeholder {
+      color: #718096 !important;
+    }
+  }
+  
+  // 密码显示/隐藏按钮
+  .el-input__suffix {
+    .el-input__suffix-inner {
+      color: #a0aec0 !important;
+      
+      &:hover {
+        color: #e2e8f0 !important;
+      }
+    }
+  }
+}
+
+// 字数统计样式
+:deep(.el-input__count) {
+  color: #718096 !important;
+  background-color: transparent !important;
+}
+
+// 选择框样式
+:deep(.el-select) {
+  .el-select__wrapper {
+    background-color: #1a202c !important;
+    border: 1px solid #4a5568 !important;
+    box-shadow: none !important;
+    
+    &:hover {
+      border-color: #409EFF !important;
+    }
+    
+    &.is-focused {
+      border-color: #409EFF !important;
+      box-shadow: 0 0 0 1px #409EFF !important;
+    }
+  }
+  
+  .el-select__selection {
+    color: #e2e8f0 !important;
+  }
+  
+  .el-select__selected-item {
+    color: #e2e8f0 !important;
+  }
+  
+  .el-select__placeholder {
+    color: #718096 !important;
   }
   
   .el-select__caret {
     color: #a0aec0 !important;
   }
-}
-
-:deep(.el-select__wrapper) {
-  background-color: #2d3748 !important;
-}
-
-// 统一选择框字体颜色
-:deep(.el-form-item__label) {
-  color: #b1bcd3 !important;
-}
-
-:deep(.el-select .el-input__inner) {
-  color: #b1bcd3 !important;
-}
-
-:deep(.el-select .el-input__wrapper) {
-  color: #b1bcd3 !important;
-}
-
-:deep(.el-select-dropdown .el-select-dropdown__item) {
-  color: #b1bcd3 !important;
-}
-
-:deep(.el-input__inner::placeholder) {
-  color: #b1bcd3 !important;
-}
-
-// 密码输入框样式
-:deep(.el-input .el-input__wrapper) {
-  background-color: #000000 !important;
-  border: 1px solid #4a5568 !important;
-  color: #b1bcd3 !important;
-}
-
-:deep(.el-input .el-input__inner) {
-  background-color: transparent !important;
-  color: #b1bcd3 !important;
-}
-
-:deep(.el-input .el-input__suffix) {
-  color: #b1bcd3 !important;
+  
+  // 修复选中项的文字颜色
+  .el-input .el-input__inner {
+    color: #e2e8f0 !important;
+  }
 }
 
 // 下拉菜单样式
 :deep(.el-select-dropdown) {
   background-color: #2d3748 !important;
   border: 1px solid #4a5568 !important;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
 :deep(.el-select-dropdown__item) {
@@ -324,31 +320,94 @@ const handleSubmit = async () => {
   
   &:hover {
     background-color: #4a5568 !important;
+    color: #ffffff !important;
   }
   
-  &.selected {
+  &.is-selected {
     background-color: #409EFF !important;
-    color: #fff !important;
+    color: #ffffff !important;
+    
+    &:hover {
+      background-color: #409EFF !important;
+      color: #ffffff !important;
+    }
   }
   
   &.hover {
     background-color: #4a5568 !important;
+    color: #ffffff !important;
   }
 }
 
-:deep(.el-popper.is-dark) {
-  background-color: #2d3748 !important;
-  border-color: #4a5568 !important;
-}
-
-// 确保所有弹出层都使用暗色主题
+// Popper弹出层样式
 :deep(.el-popper) {
   background-color: #2d3748 !important;
   border: 1px solid #4a5568 !important;
+  
+  &.is-dark {
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+  }
   
   .el-popper__arrow::before {
     background-color: #2d3748 !important;
     border: 1px solid #4a5568 !important;
   }
+}
+
+// 按钮样式优化
+:deep(.el-button) {
+  &.el-button--default {
+    background-color: #4a5568 !important;
+    border-color: #4a5568 !important;
+    color: #e2e8f0 !important;
+    
+    &:hover {
+      background-color: #718096 !important;
+      border-color: #718096 !important;
+    }
+  }
+  
+  &.el-button--primary {
+    background-color: #409EFF !important;
+    border-color: #409EFF !important;
+    
+    &:hover {
+      background-color: #66b3ff !important;
+      border-color: #66b3ff !important;
+    }
+    
+    &.is-loading {
+      background-color: #409EFF !important;
+      border-color: #409EFF !important;
+    }
+  }
+}
+
+// 表单验证错误提示
+:deep(.el-form-item__error) {
+  color: #f56565 !important;
+}
+
+// 修复表单项间距
+:deep(.el-form-item) {
+  margin-bottom: 22px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// 增加更具体的选择框输入框颜色控制
+:deep(.el-select .el-input__wrapper .el-input__inner) {
+  color: #e2e8f0 !important;
+}
+
+:deep(.el-select:not(.is-disabled):hover .el-input__wrapper .el-input__inner) {
+  color: #e2e8f0 !important;
+}
+
+:deep(.el-select.is-focused .el-input__wrapper .el-input__inner) {
+  color: #e2e8f0 !important;
 }
 </style>

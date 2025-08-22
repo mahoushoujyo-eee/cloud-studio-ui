@@ -10,7 +10,10 @@ import {
   mockGetWorkspaces,
   mockCreateWorkspace,
   mockDeleteWorkspace,
-  mockGetWorkspaceDetails
+  mockGetWorkspaceDetails,
+  mockStopWorkspace,
+  mockStartWorkspace,
+  mockGetWorkspaceLog
 } from '@/mock/api.js'
 
 // 创建axios实例
@@ -32,7 +35,10 @@ const mockRoutes = {
   'GET:/api/common/list': mockGetWorkspaces,
   'POST:/api/common/create': mockCreateWorkspace,
   'POST:/api/common/delete': mockDeleteWorkspace,
-  'POST:/api/common/details': mockGetWorkspaceDetails
+  'POST:/api/common/details': mockGetWorkspaceDetails,
+  'POST:/api/user/common/stop': mockStopWorkspace,
+  'POST:/api/user/common/restart': mockStartWorkspace,
+  'POST:/api/user/common/log': mockGetWorkspaceLog
 }
 
 // 请求拦截器

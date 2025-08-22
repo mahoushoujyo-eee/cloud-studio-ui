@@ -22,7 +22,7 @@
           >
             <el-form-item label="头像">
               <div class="avatar-section">
-                <el-avatar :size="80" :src="profileForm.avatar">
+                <el-avatar :size="80" :src="profileForm.avatar || defaultAvatar">
                   {{ profileForm.username?.charAt(0)?.toUpperCase() }}
                 </el-avatar>
                 <el-button type="primary" size="small" @click="handleAvatarUpload">
@@ -125,6 +125,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
+import defaultAvatar from '@/assets/default-avatar.svg'
 
 const router = useRouter()
 const authStore = useAuthStore()

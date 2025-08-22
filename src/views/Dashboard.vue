@@ -11,7 +11,7 @@
       <div class="header-right">
         <el-dropdown @command="handleUserCommand">
           <span class="user-dropdown">
-            <el-avatar :size="32" :src="user?.avatar">
+            <el-avatar :size="32" :src="user?.avatar || defaultAvatar">
               {{ user?.username?.charAt(0)?.toUpperCase() }}
             </el-avatar>
             <span class="username">{{ user?.username }}</span>
@@ -30,24 +30,6 @@
 
     <!-- 主内容区域 -->
     <main class="dashboard-main">
-      <!-- 侧边栏 -->
-      <aside class="dashboard-sidebar">
-        <nav class="sidebar-nav">
-          <div class="nav-item active">
-            <el-icon><Monitor /></el-icon>
-            <span>通用工作空间</span>
-          </div>
-          <div class="nav-item">
-            <el-icon><Cpu /></el-icon>
-            <span>高性能工作空间</span>
-          </div>
-          <div class="nav-item">
-            <el-icon><Grid /></el-icon>
-            <span>空间模板</span>
-          </div>
-        </nav>
-      </aside>
-
       <!-- 内容区域 -->
       <div class="dashboard-content">
         <!-- 工作空间统计 -->
@@ -62,10 +44,8 @@
             </div>
             <div class="stats-actions">
               <el-button 
-                size="small" 
                 :loading="loading" 
                 @click="refreshWorkspaces"
-                style="margin-right: 12px;"
               >
                 <el-icon><Refresh /></el-icon>
                 刷新
@@ -78,7 +58,7 @@
         <!-- 工作空间列表 -->
         <div class="workspace-container" v-loading="loading">
           <!-- 空状态提示 -->
-          <div v-if="!loading && workspaces.length === 0" class="empty-state">
+          <div v-if="initialized && !loading && workspaces.length === 0" class="empty-state">
             <div class="empty-icon">
               <el-icon size="64"><Monitor /></el-icon>
             </div>
@@ -86,7 +66,6 @@
             <p class="empty-description">创建您的第一个工作空间，开始云端开发之旅</p>
             <el-button 
               type="primary" 
-              size="large" 
               @click="showCreateDialog = true"
               class="create-workspace-btn"
             >
@@ -139,7 +118,6 @@
               <el-button
                 v-if="workspace.state === 'running' && workspace.url"
                 type="success"
-                size="small"
                 @click="openWorkspace(workspace)"
               >
                 <el-icon><Link /></el-icon>
@@ -148,7 +126,6 @@
               <el-button
                 v-else-if="workspace.state === 'stopped'"
                 type="primary"
-                size="small"
                 :loading="workspace.starting"
                 @click="startWorkspace(workspace)"
               >
@@ -158,7 +135,6 @@
               <el-button
                 v-else-if="workspace.state === 'initializing'"
                 type="warning"
-                size="small"
                 disabled
               >
                 <el-icon><Loading /></el-icon>
@@ -167,25 +143,27 @@
               <el-button
                 v-if="workspace.state === 'running'"
                 type="warning"
-                size="small"
                 :loading="workspace.stopping"
                 @click="stopWorkspace(workspace)"
               >
                 <el-icon><VideoPause /></el-icon>
                 停止
               </el-button>
-              <el-dropdown @command="(cmd) => handleWorkspaceCommand(cmd, workspace)">
-                <el-button size="small" type="info">
-                  <el-icon><More /></el-icon>
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="settings">设置</el-dropdown-item>
-                    <el-dropdown-item command="clone">克隆</el-dropdown-item>
-                    <el-dropdown-item divided command="delete" style="color: #f56c6c;">删除</el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+              <el-button
+                type="default"
+                :disabled="workspace.state !== 'running'"
+                @click="getWorkspaceLog(workspace)"
+              >
+                <el-icon><Document /></el-icon>
+                日志
+              </el-button>
+              <el-button
+                type="danger"
+                @click="deleteWorkspace(workspace)"
+              >
+                <el-icon><Delete /></el-icon>
+                删除
+              </el-button>
             </div>
           </div>
         </div>
@@ -204,10 +182,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Monitor, ArrowDown, Cpu, Grid, Document, Link, Plus, Delete, Setting, Calendar, Clock, VideoPlay, VideoPause, Loading, More, Refresh } from '@element-plus/icons-vue'
+import { Monitor, ArrowDown, Document, Link, Plus, Delete, Setting, Calendar, Clock, VideoPlay, VideoPause, Loading, More, Refresh } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { getWorkspaceLog as fetchWorkspaceLog } from '@/api/workspace'
 import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue'
+import defaultAvatar from '@/assets/default-avatar.svg'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -219,31 +199,21 @@ const sortBy = ref('recent')
 const user = computed(() => authStore.user)
 const workspaces = computed(() => workspaceStore.workspaces)
 const loading = computed(() => workspaceStore.loading)
+const initialized = computed(() => workspaceStore.initialized)
 
 // 模拟使用统计
-const usedMinutes = ref(14852)
+const usedMinutes = ref(0)
 const totalMinutes = ref(50000)
 const usagePercentage = computed(() => (usedMinutes.value / totalMinutes.value) * 100)
 
-onMounted(() => {
-  // 检查用户是否已登录
-  const token = localStorage.getItem('token')
-  if (!token || token === 'undefined') {
-    ElMessage.warning('请先登录')
-    router.push('/login')
-    return
-  }
-  
-  // 初始化用户状态
-  authStore.initUser()
-  
-  // 如果用户状态未正确初始化，跳转到登录页
+onMounted(async () => {
+  // 等待认证状态初始化完成
   if (!authStore.isAuthenticated) {
-    ElMessage.warning('登录状态已过期，请重新登录')
-    router.push('/login')
+    // 如果没有认证，路由守卫会处理跳转
     return
   }
   
+  // 获取工作空间列表
   workspaceStore.fetchWorkspaces()
 })
 
@@ -323,7 +293,10 @@ const handleUserCommand = (command) => {
 const startWorkspace = async (workspace) => {
   workspace.starting = true
   try {
-    const result = await workspaceStore.startWorkspace(workspace.id)
+    // 传递 deployment 参数给后端接口
+    const result = await workspaceStore.startWorkspace({ 
+      deployment: workspace.deployment || `${workspace.name}-deployment`
+    })
     if (result.success) {
       ElMessage.success('工作空间启动成功')
     } else {
@@ -337,7 +310,10 @@ const startWorkspace = async (workspace) => {
 const stopWorkspace = async (workspace) => {
   workspace.stopping = true
   try {
-    const result = await workspaceStore.stopWorkspace(workspace.id)
+    // 传递 deployment 参数给后端接口
+    const result = await workspaceStore.stopWorkspace({ 
+      deployment: workspace.deployment || `${workspace.name}-deployment`
+    })
     if (result.success) {
       ElMessage.success('工作空间已停止')
     } else {
@@ -362,6 +338,42 @@ const openWorkspace = async (workspace) => {
   }
 }
 
+const getWorkspaceLog = async (workspace) => {
+  try {
+    const result = await fetchWorkspaceLog({ 
+      deployment: workspace.deployment || `${workspace.name}-deployment`
+    })
+    if (result.data && result.data.data) {
+      // 显示日志内容，这里可以打开一个对话框或新窗口
+      console.log('工作空间日志:', result.data.data)
+      ElMessage.success('日志获取成功')
+      // TODO: 这里可以打开一个日志查看对话框
+    } else {
+      ElMessage.error('日志获取失败')
+    }
+  } catch (error) {
+    ElMessage.error('日志获取失败')
+  }
+}
+
+const deleteWorkspace = async (workspace) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这个工作空间吗？', '确认删除', {
+      type: 'warning'
+    })
+    const result = await workspaceStore.deleteWorkspace({ 
+      deployment: workspace.deployment || `${workspace.name}-deployment`
+    })
+    if (result.success) {
+      ElMessage.success('工作空间已删除')
+    } else {
+      ElMessage.error(result.message)
+    }
+  } catch (error) {
+    // 用户取消删除或其他错误
+  }
+}
+
 const handleWorkspaceCommand = async (command, workspace) => {
   switch (command) {
     case 'settings':
@@ -369,21 +381,6 @@ const handleWorkspaceCommand = async (command, workspace) => {
       break
     case 'clone':
       ElMessage.info('克隆功能开发中')
-      break
-    case 'delete':
-      try {
-        await ElMessageBox.confirm('确定要删除这个工作空间吗？', '确认删除', {
-          type: 'warning'
-        })
-        const result = await workspaceStore.deleteWorkspace({ pod_name: workspace.pod_name })
-        if (result.success) {
-          ElMessage.success('工作空间已删除')
-        } else {
-          ElMessage.error(result.message)
-        }
-      } catch (error) {
-        // 用户取消删除
-      }
       break
   }
 }
@@ -457,40 +454,7 @@ const refreshWorkspaces = async () => {
 }
 
 .dashboard-main {
-  display: flex;
   height: calc(100vh - 60px);
-}
-
-.dashboard-sidebar {
-  width: 240px;
-  background: #2d3748;
-  border-right: 1px solid #4a5568;
-  padding: 24px 0;
-
-  .sidebar-nav {
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 24px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.05);
-      }
-
-      &.active {
-        background: rgba(64, 158, 255, 0.1);
-        color: #409EFF;
-        border-right: 3px solid #409EFF;
-      }
-
-      span {
-        font-size: 14px;
-      }
-    }
-  }
 }
 
 .dashboard-content {
@@ -544,6 +508,12 @@ const refreshWorkspaces = async () => {
       display: flex;
       align-items: center;
       gap: 12px;
+      
+      .el-button {
+        height: 32px;
+        padding: 8px 16px;
+        font-size: 14px;
+      }
     }
   }
 }
@@ -552,6 +522,10 @@ const refreshWorkspaces = async () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background-color: #1a1a1a;
+  min-height: 200px;
+  border-radius: 8px;
+  padding: 16px;
 }
 
 .empty-state {
@@ -584,8 +558,9 @@ const refreshWorkspaces = async () => {
   
   .create-workspace-btn {
     padding: 12px 24px;
-    font-size: 16px;
+    font-size: 14px;
     border-radius: 8px;
+    height: 40px;
   }
 }
 
@@ -680,6 +655,23 @@ const refreshWorkspaces = async () => {
     gap: 8px;
     justify-content: flex-end;
     align-items: center;
+    min-width: 200px;
+    
+    .el-button {
+      min-width: 64px;
+      height: 32px;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 4px;
+    }
+    
+    .el-dropdown {
+      .el-button {
+        min-width: 32px;
+        width: 32px;
+        padding: 8px;
+      }
+    }
   }
 }
 </style>

@@ -28,6 +28,9 @@ export const useAuthStore = defineStore('auth', {
           
           localStorage.setItem('token', tokenWithBearer)
           
+          // 登录成功后获取用户信息
+          await this.fetchUserInfo()
+          
           return { success: true, message: response.data.message || '登录成功' }
         } else {
           return { success: false, message: response.data.message || '登录失败' }
@@ -78,12 +81,18 @@ export const useAuthStore = defineStore('auth', {
         if (response.data.statuscode === 200) {
           this.user = response.data.data
           this.isAuthenticated = true
+          // 保存用户信息到本地存储
+          localStorage.setItem('user', JSON.stringify(response.data.data))
           return { success: true, data: response.data.data }
         } else {
+          // 如果获取用户信息失败，清除无效的token
+          this.logout()
           return { success: false, message: response.data.message }
         }
       } catch (error) {
         console.error('Fetch user info error:', error)
+        // 网络错误或token无效时，清除登录状态
+        this.logout()
         return { success: false, message: '获取用户信息失败' }
       }
     },
@@ -98,22 +107,38 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('user')
     },
 
-    // 初始化认证状态 - 修复方法名
-    initUser() {
+    // 初始化认证状态
+    async initUser() {
       const token = localStorage.getItem('token')
       const user = localStorage.getItem('user')
       
-      if (token && user && user !== 'undefined') {
-        try {
-          this.token = token
-          this.user = JSON.parse(user)
-          this.isAuthenticated = true
-        } catch (error) {
-          console.error('解析用户信息失败:', error)
-          // 清除无效数据
-          localStorage.removeItem('token')
-          localStorage.removeItem('user')
+      if (token && token !== 'null' && token !== 'undefined') {
+        this.token = token
+        
+        // 如果有保存的用户信息，先恢复
+        if (user && user !== 'null' && user !== 'undefined') {
+          try {
+            this.user = JSON.parse(user)
+            this.isAuthenticated = true
+          } catch (error) {
+            console.error('解析用户信息失败:', error)
+            localStorage.removeItem('user')
+          }
         }
+        
+        // 验证token有效性并获取最新用户信息
+        try {
+          const result = await this.fetchUserInfo()
+          if (!result.success) {
+            console.log('Token已失效，需要重新登录')
+          }
+        } catch (error) {
+          console.error('验证token失败:', error)
+          this.logout()
+        }
+      } else {
+        // 没有token，清除所有认证状态
+        this.logout()
       }
     }
   }

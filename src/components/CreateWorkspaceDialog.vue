@@ -303,7 +303,7 @@ const handleSubmit = async () => {
   
   // 修复选中项的文字颜色
   .el-input .el-input__inner {
-    color: #e2e8f0 !important;
+    color:rgb(8, 8, 8) !important;
   }
 }
 

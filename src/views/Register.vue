@@ -13,15 +13,6 @@
         class="register-form"
         @submit.prevent="handleRegister"
       >
-        <el-form-item prop="username">
-          <el-input
-            v-model="registerForm.username"
-            placeholder="用户名"
-            size="large"
-            prefix-icon="User"
-          />
-        </el-form-item>
-        
         <el-form-item prop="nickname">
           <el-input
             v-model="registerForm.nickname"
@@ -121,7 +112,6 @@ const codeLoading = ref(false)
 const countdown = ref(0)
 
 const registerForm = reactive({
-  username: '',
   nickname: '',
   email: '',
   code: '',
@@ -138,10 +128,6 @@ const validateConfirmPassword = (rule, value, callback) => {
 }
 
 const registerRules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度在3到20个字符', trigger: 'blur' }
-  ],
   nickname: [
     { required: true, message: '请输入昵称', trigger: 'blur' },
     { min: 2, max: 20, message: '昵称长度在2到20个字符', trigger: 'blur' }
@@ -214,7 +200,6 @@ const handleRegister = async () => {
   
   try {
     const result = await authStore.register({
-      username: registerForm.username,
       nickname: registerForm.nickname,
       email: registerForm.email,
       password: registerForm.password,

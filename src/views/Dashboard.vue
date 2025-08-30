@@ -33,7 +33,7 @@
       <!-- 内容区域 -->
       <div class="dashboard-content">
         <!-- 工作空间统计 -->
-        <div class="workspace-stats">
+        <div class="workspace-stats" v-loading="usageLoading">
           <div class="stats-card">
             <div class="stats-info">
               <h3>通用工作空间</h3>
@@ -141,6 +141,14 @@
                 初始化中
               </el-button>
               <el-button
+                v-else-if="workspace.state === 'pending'"
+                type="warning"
+                disabled
+              >
+                <el-icon><Loading /></el-icon>
+                启动中
+              </el-button>
+              <el-button
                 v-if="workspace.state === 'running'"
                 type="warning"
                 :loading="workspace.stopping"
@@ -175,18 +183,27 @@
       v-model="showCreateDialog"
       @created="handleWorkspaceCreated"
     />
+    
+    <!-- 日志查看对话框 -->
+    <LogViewDialog
+      v-model="showLogDialog"
+      :workspace-name="currentWorkspaceName"
+      :log-content="currentLogContent"
+      :loading="logLoading"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Monitor, ArrowDown, Document, Link, Plus, Delete, Setting, Calendar, Clock, VideoPlay, VideoPause, Loading, More, Refresh } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useWorkspaceStore } from '@/stores/workspace'
-import { getWorkspaceLog as fetchWorkspaceLog } from '@/api/workspace'
+import { getWorkspaceLog as fetchWorkspaceLog, getWorkspaceUsage, getWorkspaceList } from '@/api/workspace'
 import CreateWorkspaceDialog from '@/components/CreateWorkspaceDialog.vue'
+import LogViewDialog from '@/components/LogViewDialog.vue'
 import defaultAvatar from '@/assets/default-avatar.svg'
 
 const router = useRouter()
@@ -194,17 +211,98 @@ const authStore = useAuthStore()
 const workspaceStore = useWorkspaceStore()
 
 const showCreateDialog = ref(false)
-const sortBy = ref('recent')
-
+const showLogDialog = ref(false)
+const currentWorkspaceName = ref('')
+const currentLogContent = ref('')
+const logLoading = ref(false)
 const user = computed(() => authStore.user)
 const workspaces = computed(() => workspaceStore.workspaces)
 const loading = computed(() => workspaceStore.loading)
 const initialized = computed(() => workspaceStore.initialized)
 
-// 模拟使用统计
+// 使用统计数据
 const usedMinutes = ref(0)
-const totalMinutes = ref(50000)
+const totalMinutes = ref(50000) // 总分钟数暂时保持固定值
+const usageLoading = ref(false)
 const usagePercentage = computed(() => (usedMinutes.value / totalMinutes.value) * 100)
+
+// 轮询相关
+const pollingInterval = ref(null)
+const POLLING_DELAY = 5000 // 5秒轮询间隔
+
+// 静默轮询功能（不显示加载动画）
+const startPolling = () => {
+  // 先清理已存在的轮询
+  stopPolling()
+  
+  pollingInterval.value = setInterval(async () => {
+    try {
+      // 静默获取数据，不调用store的fetchWorkspaces方法避免显示加载状态
+      await Promise.all([
+        // 直接调用API获取工作空间列表，然后直接更新store状态
+        getWorkspaceList({}).then(response => {
+          if (response.data.statuscode === 200) {
+            // 直接更新store数据，不触发loading状态
+            workspaceStore.$patch({
+              workspaces: response.data.data || [],
+              total: (response.data.data || []).length,
+              initialized: true
+            })
+          }
+        }),
+        // 静默获取使用统计
+        getWorkspaceUsage({}).then(result => {
+          if (result.data && result.data.statuscode === 200) {
+            const usedMinutesFromApi = result.data.data
+            if (typeof usedMinutesFromApi === 'number') {
+              usedMinutes.value = usedMinutesFromApi
+            }
+          }
+        })
+      ])
+      console.log('轮询更新成功:', new Date().toLocaleTimeString())
+    } catch (error) {
+      console.error('轮询更新失败:', error)
+      // 轮询失败不显示错误消息，避免频繁弹窗
+    }
+  }, POLLING_DELAY)
+}
+
+const stopPolling = () => {
+  if (pollingInterval.value) {
+    clearInterval(pollingInterval.value)
+    pollingInterval.value = null
+  }
+}
+
+// 获取使用统计数据（用于初始化和手动刷新）
+const fetchUsageData = async () => {
+  try {
+    usageLoading.value = true
+    const result = await getWorkspaceUsage({})
+    
+    if (result.data && result.data.statuscode === 200) {
+      // 后端返回的data字段直接是使用的分钟数
+      const usedMinutesFromApi = result.data.data
+      if (typeof usedMinutesFromApi === 'number') {
+        usedMinutes.value = usedMinutesFromApi
+      }
+      console.log('使用统计数据:', {
+        used_minutes: usedMinutesFromApi,
+        total_minutes: totalMinutes.value,
+        message: result.data.message
+      })
+    } else {
+      console.error('获取使用统计失败:', result)
+      ElMessage.warning('获取使用统计失败')
+    }
+  } catch (error) {
+    console.error('获取使用统计出错:', error)
+    ElMessage.error('获取使用统计出错')
+  } finally {
+    usageLoading.value = false
+  }
+}
 
 onMounted(async () => {
   // 等待认证状态初始化完成
@@ -213,8 +311,19 @@ onMounted(async () => {
     return
   }
   
-  // 获取工作空间列表
-  workspaceStore.fetchWorkspaces()
+  // 初始化时获取数据（显示加载状态）
+  await Promise.all([
+    workspaceStore.fetchWorkspaces(),
+    fetchUsageData()
+  ])
+  
+  // 启动轮询
+  startPolling()
+})
+
+onUnmounted(() => {
+  // 组件销毁时清理轮询
+  stopPolling()
 })
 
 const getStatusType = (state) => {
@@ -222,6 +331,7 @@ const getStatusType = (state) => {
     running: 'success',
     stopped: 'info',
     initializing: 'warning',
+    pending: 'warning',
     error: 'danger'
   }
   return statusMap[state] || 'info'
@@ -232,6 +342,7 @@ const getStatusText = (state) => {
     running: '运行中',
     stopped: '已停止',
     initializing: '初始化中',
+    pending: '启动中',
     error: '错误'
   }
   return statusMap[state] || '未知'
@@ -340,19 +451,26 @@ const openWorkspace = async (workspace) => {
 
 const getWorkspaceLog = async (workspace) => {
   try {
+    currentWorkspaceName.value = workspace.name
+    showLogDialog.value = true
+    logLoading.value = true
+    
     const result = await fetchWorkspaceLog({ 
       deployment: workspace.deployment || `${workspace.name}-deployment`
     })
-    if (result.data && result.data.data) {
-      // 显示日志内容，这里可以打开一个对话框或新窗口
-      console.log('工作空间日志:', result.data.data)
-      ElMessage.success('日志获取成功')
-      // TODO: 这里可以打开一个日志查看对话框
+    
+    if (result.data && result.data.statuscode === 200) {
+      currentLogContent.value = result.data.data || '无日志内容'
     } else {
+      currentLogContent.value = `获取日志失败：${result.data?.message || '未知错误'}`
       ElMessage.error('日志获取失败')
     }
   } catch (error) {
+    console.error('获取日志出错:', error)
+    currentLogContent.value = `请求失败：${error.message || '网络错误'}`
     ElMessage.error('日志获取失败')
+  } finally {
+    logLoading.value = false
   }
 }
 
@@ -396,8 +514,15 @@ const handleWorkspaceCreated = async () => {
 
 const refreshWorkspaces = async () => {
   try {
-    await workspaceStore.fetchWorkspaces()
+    // 手动刷新时显示加载状态
+    await Promise.all([
+      workspaceStore.fetchWorkspaces(),
+      fetchUsageData()
+    ])
     ElMessage.success('刷新成功')
+    
+    // 重启轮询以确保时间间隔重新计算
+    startPolling()
   } catch (error) {
     ElMessage.error('刷新失败，请稍后重试')
   }

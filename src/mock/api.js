@@ -128,13 +128,23 @@ export const mockStartWorkspace = async (data) => {
   await delay()
   const workspace = mockWorkspaces.find(ws => ws.deployment === data.deployment)
   if (workspace) {
-    workspace.status = 'Running'
-    workspace.phase = 'Running'
-    workspace.state = 'running'
+    // 首先设置为pending状态
+    workspace.status = 'Pending'
+    workspace.phase = 'Pending'
+    workspace.state = 'pending'
     workspace.UpdatedAt = new Date().toISOString()
-    // 模拟生成访问 URL
-    workspace.url = `https://${workspace.name}.cloudstudio.dev`
-    return mockApiResponse(null, '工作空间启动成功')
+    
+    // 模拟异步启动过程，2秒后变为running状态
+    setTimeout(() => {
+      workspace.status = 'Running'
+      workspace.phase = 'Running'
+      workspace.state = 'running'
+      workspace.UpdatedAt = new Date().toISOString()
+      // 模拟生成访问 URL
+      workspace.url = `https://${workspace.name}.cloudstudio.dev`
+    }, 2000)
+    
+    return mockApiResponse(null, '工作空间启动中')
   }
   return mockErrorResponse('工作空间不存在', 404)
 }
@@ -144,19 +154,92 @@ export const mockGetWorkspaceLog = async (data) => {
   await delay()
   const workspace = mockWorkspaces.find(ws => ws.deployment === data.deployment)
   if (workspace) {
-    // 模拟日志内容
-    const logContent = `
-=== ${workspace.name} 工作空间日志 ===
-[2024-01-20 10:30:00] INFO: 容器启动中...
-[2024-01-20 10:30:05] INFO: 环境初始化完成
-[2024-01-20 10:30:10] INFO: 服务已启动，端口: ${workspace.port}
-[2024-01-20 10:30:15] INFO: 工作空间就绪，URL: ${workspace.url}
-[2024-01-20 10:35:00] DEBUG: 健康检查通过
-[2024-01-20 10:40:00] DEBUG: 资源使用: CPU ${workspace.cpu}, Memory ${workspace.memory}
-    `.trim()
-    return mockApiResponse(logContent, '日志获取成功')
+    // 模拟真实的日志内容，采用用户提供的格式
+    const logContent = `[migrations] started
+[migrations] no migrations found
+───────────────────────────────────────
+
+      ██╗     ███████╗██╗ ██████╗
+      ██║     ██╔════╝██║██╔═══██╗
+      ██║     ███████╗██║██║   ██║
+      ██║     ╚════██║██║██║   ██║
+      ███████╗███████║██║╚██████╔╝
+      ╚══════╝╚══════╝╚═╝ ╚═════╝
+
+   Brought to you by linuxserver.io
+───────────────────────────────────────
+
+To support LSIO projects visit:
+https://www.linuxserver.io/donate/
+
+───────────────────────────────────────
+GID/UID
+───────────────────────────────────────
+
+User UID:    1000
+User GID:    1000
+───────────────────────────────────────
+Linuxserver.io version: 4.103.0-ls292
+Build-date: 2025-08-13T02:36:25+00:00
+───────────────────────────────────────
+    
+setting up sudo access
+adding abc to sudoers
+setting sudo password using SUDO_PASSWORD env var
+New password: Retype new password: passwd: password updated successfully
+[custom-init] No custom files found, skipping...
+[2025-08-30T08:57:00.787Z] info  code-server 4.103.0 f1236d80b96dce4fc53bbf63b77d03d1fec8eb1d
+[2025-08-30T08:57:00.788Z] info  Using user-data-dir /config/data
+[2025-08-30T08:57:00.810Z] info  Using config file /config/.config/code-server/config.yaml
+[2025-08-30T08:57:00.810Z] info  HTTP server listening on http://0.0.0.0:8443/
+[2025-08-30T08:57:00.810Z] info    - Authentication is enabled
+[2025-08-30T08:57:00.811Z] info      - Using password from $PASSWORD
+[2025-08-30T08:57:00.811Z] info    - Not serving HTTPS
+[2025-08-30T08:57:00.811Z] info  Session server listening on /config/data/code-server-ipc.sock
+Connection to 127.0.0.1 8443 port [tcp/*] succeeded!
+[ls.io-init] done.
+[08:57:25] 
+
+
+
+
+[08:57:25] Extension host agent started.
+File not found: /app/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /app/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[08:57:33] [10.244.219.64][74b749df][ManagementConnection] New connection established.
+[08:57:36] [10.244.219.64][02a576ac][ExtensionHostConnection] New connection established.
+[08:57:36] [10.244.219.64][02a576ac][ExtensionHostConnection] ⟨1126⟩ Launched Extension Host Process.
+[2025-08-30T08:58:06.073Z] error Failed to get latest version [38;2;140;140;140m{"error":"https://api.github.com/repos/coder/code-server/releases/latest: 503"}[0m
+[09:06:32] Error: read ECONNRESET
+    at TCP.onStreamRead (node:internal/stream_base_commons:216:20) {
+  errno: -104,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+[09:06:32] [10.244.219.64][74b749df][ManagementConnection] The client has disconnected, will wait for reconnection 3h before disposing...
+File not found: /app/code-server/lib/vscode/node_modules/vsda/rust/web/vsda_bg.wasm
+File not found: /app/code-server/lib/vscode/node_modules/vsda/rust/web/vsda.js
+[09:07:27] [10.244.219.64][74b749df][ManagementConnection] Another client has connected, will shorten the wait for reconnection 5m before disposing...
+[09:07:27] [10.244.219.64][b264e7f3][ManagementConnection] New connection established.
+[09:07:29] [10.244.219.64][1b76646d][ExtensionHostConnection] New connection established.
+[09:07:29] [10.244.219.64][1b76646d][ExtensionHostConnection] ⟨4005⟩ Launched Extension Host Process.`
+    
+    // 返回符合用户要求的响应格式
+    return {
+      data: {
+        statuscode: 200,
+        data: logContent,
+        message: "查询成功"
+      }
+    }
   }
-  return mockErrorResponse('工作空间不存在', 404)
+  return {
+    data: {
+      statuscode: 404,
+      data: null,
+      message: "工作空间不存在"
+    }
+  }
 }
 
 export default function setupMockAPI() {

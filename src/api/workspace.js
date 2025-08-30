@@ -82,3 +82,11 @@ export const getWorkspaceLog = (data) => {
     data
   })
 }
+
+export const getWorkspaceUsage = (data) => {
+  return request({
+    url: prefix + '/common/usage',
+    method: 'post',
+    data
+  })
+}

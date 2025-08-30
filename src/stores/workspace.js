@@ -30,6 +30,9 @@ export const useWorkspaceStore = defineStore('workspace', {
     },
     initializingWorkspaces: (state) => {
       return state.workspaces.filter(workspace => workspace.state === 'initializing')
+    },
+    pendingWorkspaces: (state) => {
+      return state.workspaces.filter(workspace => workspace.state === 'pending')
     }
   },
 

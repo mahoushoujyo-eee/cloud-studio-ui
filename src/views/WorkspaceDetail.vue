@@ -28,6 +28,14 @@
             启动
           </el-button>
           <el-button
+            v-else-if="workspace?.status === 'pending' || workspace?.status === 'starting'"
+            type="warning"
+            disabled
+          >
+            <el-icon><Loading /></el-icon>
+            启动中
+          </el-button>
+          <el-button
             v-if="workspace?.status === 'running'"
             type="warning"
             :loading="stopping"
@@ -168,6 +176,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { ArrowLeft, Link, VideoPlay, VideoPause, Loading, InfoFilled, Setting, Monitor, Document } from '@element-plus/icons-vue'
 import { useWorkspaceStore } from '@/stores/workspace'
 
 const route = useRoute()
@@ -202,6 +211,7 @@ const getStatusType = (status) => {
     running: 'success',
     stopped: 'info',
     starting: 'warning',
+    pending: 'warning',
     error: 'danger'
   }
   return statusMap[status] || 'info'
@@ -212,6 +222,7 @@ const getStatusText = (status) => {
     running: '运行中',
     stopped: '已停止',
     starting: '启动中',
+    pending: '启动中',
     error: '错误'
   }
   return statusMap[status] || '未知'
